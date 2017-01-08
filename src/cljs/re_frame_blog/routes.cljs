@@ -19,11 +19,13 @@
   ;; --------------------
   ;; define routes here
   (defroute "/" []
-    (re-frame/dispatch [:set-active-panel :home-panel]))
+    (re-frame/dispatch [:set-active-panel :index-panel]))
 
-  (defroute "/about" []
-    (re-frame/dispatch [:set-active-panel :about-panel]))
+  (defroute "/blog/:index" {:as params}
+    (re-frame/dispatch [:set-active-panel :blog-panel params]))
 
+  (defroute "/new" []
+    (re-frame/dispatch [:set-active-panel :new-panel]))
 
   ;; --------------------
   (hook-browser-navigation!))

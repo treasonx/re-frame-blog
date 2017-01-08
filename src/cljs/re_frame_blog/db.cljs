@@ -1,4 +1,7 @@
 (ns re-frame-blog.db)
 
 (def default-db
-  {:name "re-frame"})
+  {:title "My Blog"
+   :posts []
+   :active-panel {:panel :index-panel}
+   :new-post {:title "" :body ""}})

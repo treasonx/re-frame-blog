@@ -11,3 +11,14 @@
  :active-panel
  (fn [db _]
    (:active-panel db)))
+
+(re-frame/reg-sub
+ :posts
+ (fn [db]
+   (:posts db)))
+
+(re-frame/reg-sub
+ :new-post
+ (fn [db]
+   (:new-post db)))
+
