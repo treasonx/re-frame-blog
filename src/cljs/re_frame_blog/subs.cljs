@@ -13,6 +13,11 @@
    (:active-panel db)))
 
 (re-frame/reg-sub
+ :selected-post
+ (fn [db _]
+   (:selected-post db)))
+
+(re-frame/reg-sub
  :posts
  (fn [db]
    (:posts db)))

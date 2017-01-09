@@ -12,17 +12,39 @@
 
 (re-frame/reg-event-db
  :set-active-panel
- (fn [db [_ active-panel params]]
+ (fn [db [_ active-panel]]
    (clear-post db)
-   (println params)
    (assoc db :active-panel active-panel)))
+
+(re-frame/reg-event-db
+ :set-active-post
+ (fn [db [_ index]]
+   (clear-post db)
+   (def selected-post (nth (:posts db) index))
+   (def post-with-index (assoc selected-post :index index))
+   (assoc db :selected-post post-with-index)))
 
 (re-frame/reg-event-db
  :save-new-post
  (fn [db [_ _]]
    (def post (:new-post db))
    (clear-post db)
-   (assoc db :posts (conj (db :posts) post))))
+   (def index (count (db :posts)))
+   (assoc db :posts (concat (db :posts) [(assoc post :id index)]))))
+
+(re-frame/reg-event-db
+ :save-post
+ (fn [db [_ index]]
+   (let [post (:new-post db)]
+     (clear-post db)
+     (assoc db :posts (assoc (db :posts) index (assoc post :id index))))))
+
+(re-frame/reg-event-db
+ :delete-post
+ (fn [db [_ index]]
+   (let [post (:new-post db)]
+     (clear-post db)
+     (assoc db :posts (keep-indexed #( if (not= %1 index) %2) (db :post))))))
 
 (re-frame/reg-event-db
  :update-new-post

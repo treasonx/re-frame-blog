@@ -4,7 +4,6 @@
               [re-com.core :as re-com]))
 
 ;; home
-
 (defn title [title]
   [re-com/title
    :label title
@@ -16,10 +15,13 @@
         (title (str "You don't have any posts!"))))
 
 (defn goto-new []
-  (re-frame/dispatch [:set-active-panel :new-panel]))
+  (aset js/location "hash" "/new"))
+
+(defn goto-post [index]
+  (aset js/location "hash" (str "/blog/" index)))
 
 (defn goto-index []
-  (re-frame/dispatch [:set-active-panel :index-panel]))
+  (aset js/location "hash" ""))
 
 (defn new-button []
   [re-com/button
@@ -40,36 +42,76 @@
    :gap "1em"
    :children [[index-title posts] [new-button] [list-posts posts]]]))
 
-;; about
-
+;; blog detail
 (defn link-to-home-page []
   [re-com/hyperlink-href
    :label "Index page"
    :href "#/"])
 
+(defn link-to-edit [index]
+  [re-com/hyperlink-href
+   :label "Edit"
+   :href (str "#/edit/" index)])
+
 (defn blog-panel []
+  (let [selected-post (re-frame/subscribe [:selected-post])]
   [re-com/v-box
    :gap "1em"
-   :children [[title "Blog page placeholder"] [link-to-home-page]]])
+   :children [[title (@selected-post :title)] 
+              [:p (@selected-post :body)] 
+              [link-to-home-page]
+              [link-to-edit (@selected-post :index)]]]))
 
-;; new 
-
-(defn new-title-field []
+;; edit fields 
+(defn title-field [value on-change]
   [re-com/v-box
    :gap "1em"
    :children [[re-com/label :label "Title"] [re-com/input-text 
-               :model ""
+               :model value
                :change-on-blur? false
-               :on-change #(re-frame/dispatch [:update-new-post {:title %}])]]])
+               :on-change on-change]]])
 
-(defn new-body-field []
+(defn body-field [value on-change]
   [re-com/v-box
    :gap "1em"
    :children [[re-com/label :label "Body"] [re-com/input-textarea
-               :model ""
+               :model value
                :change-on-blur? false
-               :on-change #(re-frame/dispatch [:update-new-post {:body %}])]]])
+               :on-change on-change]]])
 
+;; blog edit
+
+(defn save-post [index]
+  (re-frame/dispatch [:save-post index])
+  (goto-post index))
+
+(defn delete-post [index]
+  (re-frame/dispatch [:delete-post index])
+  (goto-index))
+
+(defn save-button [index]
+  [re-com/button
+   :label "Save"
+   :on-click #(save-post index)])
+
+(defn delete-button [index]
+  [re-com/button
+   :label "Delete"
+   :on-click #(delete-post index)])
+
+
+(defn edit-panel []
+  (let [selected-post (re-frame/subscribe [:selected-post])]
+  [re-com/v-box
+   :gap "1em"
+   :children [[title (str "Edit: " (@selected-post :title))] 
+              [title-field (@selected-post :title) #(re-frame/dispatch [:update-new-post {:title %}])] 
+              [body-field (@selected-post :body) #(re-frame/dispatch [:update-new-post {:body %}])]
+              [save-button (@selected-post :index)]
+              [delete-button]
+              [link-to-home-page]]]))
+
+;; new 
 (defn save-new-post []
   (re-frame/dispatch [:save-new-post])
   (goto-index))
@@ -82,7 +124,9 @@
 (defn new-form []
   [re-com/v-box
    :gap "1em"
-   :children [[new-title-field] [new-body-field] [save-new-button]]])
+   :children [[title-field "" #(re-frame/dispatch [:update-new-post {:title %}])] 
+              [body-field "" #(re-frame/dispatch [:update-new-post {:body %}])] 
+              [save-new-button]]])
    
 (defn new-panel []
   [re-com/v-box
@@ -96,12 +140,12 @@
     :index-panel [index-panel]
     :blog-panel [blog-panel]
     :new-panel [new-panel]
+    :edit-panel [edit-panel]
     [:div]))
 
 (defn main-panel []
   (let [active-panel (re-frame/subscribe [:active-panel])]
     (fn []
-      (println @active-panel)
       [re-com/v-box
        :height "100%"
        :children [[panels @active-panel]]])))

@@ -2,6 +2,6 @@
 
 (def default-db
   {:title "My Blog"
-   :posts []
+   :posts (list)
    :active-panel {:panel :index-panel}
    :new-post {:title "" :body ""}})

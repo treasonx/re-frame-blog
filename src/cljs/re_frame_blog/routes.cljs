@@ -22,7 +22,14 @@
     (re-frame/dispatch [:set-active-panel :index-panel]))
 
   (defroute "/blog/:index" {:as params}
-    (re-frame/dispatch [:set-active-panel :blog-panel params]))
+    (def index (js/parseInt (params :index)))
+    (re-frame/dispatch [:set-active-panel :blog-panel])
+    (re-frame/dispatch [:set-active-post  index]))
+
+  (defroute "/edit/:index" {:as params}
+    (def index (js/parseInt (params :index)))
+    (re-frame/dispatch [:set-active-panel :edit-panel])
+    (re-frame/dispatch [:set-active-post  index]))
 
   (defroute "/new" []
     (re-frame/dispatch [:set-active-panel :new-panel]))
